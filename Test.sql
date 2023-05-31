@@ -21,7 +21,8 @@ SET time_zone = "+00:00";
 -- База данных: `Test`
 --
 
--- --------------------------------------------------------
+CREATE DATABASE IF NOT EXISTS Test;
+USE Test;
 
 --
 -- Структура таблицы `Token`
@@ -30,9 +31,9 @@ SET time_zone = "+00:00";
 CREATE TABLE `Token` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `token` varchar(64) NOT NULL,
-  `salt` varchar(16) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `token` varchar(255) NOT NULL,
+  `salt` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -44,9 +45,9 @@ CREATE TABLE `User` (
   `id` int(11) NOT NULL,
   `name` int(11) NOT NULL,
   `email` int(11) NOT NULL,
-  `password` varchar(64) NOT NULL,
-  `salt` varchar(16) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `password` varchar(255) NOT NULL,
+  `salt` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Индексы сохранённых таблиц

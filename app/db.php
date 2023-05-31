@@ -1,6 +1,6 @@
 <?php 
 try {
-	$pdo =  new PDO('mysql:host='.getenv('PMA_HOST').';dbname='.getenv('MYSQL_DATABASE'), getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'));
+	$pdo =  new PDO('mysql:host='.getenv('PMA_HOST').';dbname='.getenv('MYSQL_DATABASE').';charset=utf8', getenv('MYSQL_USER'), getenv('MYSQL_PASSWORD'));
 }catch (PDOException $e){
 
 		echo 'PDOException: ' . $e->getMessage();
