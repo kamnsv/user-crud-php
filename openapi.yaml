@@ -3,12 +3,19 @@ info:
   version: 1.0.0
   title: User API
 servers:
-  - url: http://localhost:5000
+  - url: https://localhost
+components:
+  securitySchemes:
+    basicAuth:  
+      type: http
+      scheme: basic
 paths:
   /users:
     get:
       summary: Get list of users
       operationId: getUsers
+      security:
+        - basicAuth: [] 
       responses:
         '200':
           description: List of users
@@ -28,6 +35,8 @@ paths:
     post:
       summary: Create user
       operationId: createUser
+      security:
+        - basicAuth: [] 
       requestBody:
         required: true
         content:
@@ -47,16 +56,19 @@ paths:
         '400':
           description: Bad request
           content:
-            application/json:
+            application/text:
               schema:
                 type: object
                 properties:
                   message:
                     type: string
   /users?id={id}:
+
     get:
       summary: Get user by ID
       operationId: getUser
+      security:
+        - basicAuth: [] 
       parameters:
         - name: id
           in: path
@@ -81,6 +93,8 @@ paths:
     put:
       summary: Update user
       operationId: updateUser
+      security:
+        - basicAuth: [] 
       parameters:
         - name: id
           in: path
@@ -107,7 +121,7 @@ paths:
         '400':
           description: Bad request
           content:
-            application/json:
+            application/text:
               schema:
                 type: object
                 properties:
@@ -116,6 +130,8 @@ paths:
     delete:
       summary: Delete user
       operationId: deleteUser
+      security:
+        - basicAuth: [] 
       parameters:
         - name: id
           in: path
@@ -129,7 +145,7 @@ paths:
         '400':
           description: Bad request
           content:
-            application/json:
+            application/text:
               schema:
                 type: object
                 properties:
