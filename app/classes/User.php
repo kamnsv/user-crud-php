@@ -1,54 +1,59 @@
 <?php
-//CRUD модель пользователей
-class User {
-    private $db;
 
-    public function __construct($pdo){
-        $this->db = $pdo;
-    }
+require_once 'interfaces/Crud.php';
+require_once 'Salt.php';
+require_once 'Model.php';
 
-    public function getAllUsers() {
+class User extends Model implements Crud  {
+   	
+    public function readAll() {
         $stmt = $this->db->query('SELECT id, name, email FROM User');
         $users = [];
-        while ($row = $stmt->fetch()) {
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $users[] = $row;
         }
         return $users;
     }
 
-    public function getUserById($id) {
+    public function read($id) {
         $stmt = $this->db->prepare('SELECT id, name, email FROM User WHERE id = :id');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function addUser($name, $email, $password) {
-		$salt = bin2hex(random_bytes(16));
-		$hashed = hash('sha256', $password . $salt);
+    public function create($data) {
+		
         $stmt = $this->db->prepare('INSERT INTO User (name, email, password, salt) VALUES (:name, :email, :password, :salt)');
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':email', $email);
+
+		$stmt->bindParam(':name', $data['name']);
+        $stmt->bindParam(':email', $data['email']);
+		
+		list($salt, $hashed) = Salt::salt_hashed($data['password']);
         $stmt->bindParam(':password', $hashed);
 		$stmt->bindParam(':salt', $salt);
-        $stmt->execute();
-        return $stmt->lastInsertId();
+		
+		if (!$this->exec($stmt))
+			return 0;
+
+		return $this->db->lastInsertId();
+	
     }
 
-    public function updateUser($id, $name, $email, $password) {
-		$salt = bin2hex(random_bytes(16));
-		$hashed = hash('sha256', $password . $salt);
+    public function update($id, $data) {
+		
         $stmt = $this->db->prepare('UPDATE User SET name = :name, email = :email, password = :password, salt = :salt WHERE id = :id');
         $stmt->bindParam(':id', $id);
-        $stmt->bindParam(':name', $name);
-        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':name', $data['name']);
+        $stmt->bindParam(':email', $data['email']);
+		list($salt, $hashed) = Salt::salt_hashed($data['password']);
         $stmt->bindParam(':password', $hashed);
 		$stmt->bindParam(':salt', $salt);
-        $stmt->execute();
+        $this->exec($stmt);
         return $stmt->rowCount();
     }
 
-    public function deleteUser($id) {
+    public function delete($id) {
         $stmt = $this->db->prepare('DELETE FROM User WHERE id = :id');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
