@@ -1,17 +1,50 @@
-<?php 
+<?php
+
+$debug = getenv('DEBUG_MODE');
+if ($debug) {
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+	error_reporting(E_ALL);
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
-$url = $_SERVER['REQUEST_URI'];
-if (empty($url) || '/index.php' == $url)
+$url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+
+if ('/index.php' == $url)
 	$url = '/';
 
 if ('/users' == $url) {
+	require_once 'auth.php';
 	require_once 'users.php';
 	exit;
 }
 	
 if ('POST' == $method && '/' == $url){
-	require_once 'tokens.php';
+	// Предоставление токена
+	
+	$name = $_POST['name'];
+
+	// Если нет name то возвращаем ошибку
+	if (empty($name)) {
+		http_response_code(400);
+		echo "key 'name' is empty";
+		exit;
+	}
+
+	require_once 'db.php'; 
+	require_once 'classes/Token.php';
+
+	$token = (new Token($pdo, $debug))->provide($name, getenv('SIZE_TOKEN'));
+
+	if (0 === $token){
+		http_response_code(400);
+		exit;
+	}
+	
+	echo 'Для Вас: ', $name, '</br>';
+	echo 'Создан токен: ', $token ;
+	
 	exit;	
 }
 
@@ -43,4 +76,3 @@ if ('GET' == $method && '/' == $url): ?>
 	exit;
 ?>
 <?php endif ?>
-
