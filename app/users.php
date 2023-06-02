@@ -7,13 +7,13 @@ $id = isset($_GET['id']) ? $_GET['id'] : '';
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Получение списка пользователей
-if ('GET' == $method && empty($id)) {
+if ('GET' == $method && !isset($_GET['id'])) {
     echo json_encode($user->readAll());
     exit;
 }
 
 // Получение пользователя по ID
-if ('GET' == $method && !empty($id)) {
+if ('GET' == $method && isset($_GET['id'])) {
 	$data = $user->read($id);
 	if (False === $data) {
 		http_response_code(400);
@@ -53,7 +53,7 @@ if ('POST' == $method) {
 }
 
 // Обновление пользователя по ID
-if ('PUT' == $method && !empty($id)) {
+if ('PUT' == $method && isset($_GET['id'])) {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!empty($data['name']) && !empty($data['email']) && !empty($data['password'])) {
         $result = $user->update($id, $data);
@@ -73,7 +73,7 @@ if ('PUT' == $method && !empty($id)) {
 }
 
 // Удаление пользователя по ID
-if ('DELETE' == $method && !empty($id)) {
+if ('DELETE' == $method && isset($_GET['id'])) {
     $result = $user->delete($id);
     if (0 == $result) {
         http_response_code(404);
