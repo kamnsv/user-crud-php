@@ -1,28 +1,48 @@
 <?php
-require_once 'models/User.php';
+require_once 'classes/User.php';
 require_once 'db.php';
 
-$user = new User($pdo);
+$user = new User($pdo, $debug);
 $id = isset($_GET['id']) ? $_GET['id'] : '';
 $method = $_SERVER['REQUEST_METHOD'];
 
 // Получение списка пользователей
 if ('GET' == $method && empty($id)) {
-    echo json_encode($user->getAllUsers());
+    echo json_encode($user->readAll());
     exit;
 }
 
 // Получение пользователя по ID
 if ('GET' == $method && !empty($id)) {
-    echo json_encode($user->getUserById($id));
+	$data = $user->read($id);
+	if (False === $data) {
+		http_response_code(400);
+		echo 'User not found';
+		exit;
+	}
+	echo json_encode($data); 
     exit;
 }
 
 // Создание пользователя
 if ('POST' == $method) {
-    $data = json_decode(file_get_contents('php://input'), true);
+
+	try {
+		$data = json_decode(file_get_contents('php://input'), true);
+	} catch (Exception | ErrorException $e){
+		http_response_code(400);
+        echo 'Invalid parsing data';
+        exit;
+	}
+	
     if (!empty($data['name']) && !empty($data['email']) && !empty($data['password'])) {
-        $data['id'] = $user->addUser($data['name'], $data['email'], $data['password']);
+        $data['id'] = $user->create($data);
+		var_dump($data);
+		if (0 == $data['id']){
+			http_response_code(400);
+			echo 'Invalid insert data';
+			exit;
+		}
         echo json_encode($data);
         exit;
     } else {
@@ -36,7 +56,7 @@ if ('POST' == $method) {
 if ('PUT' == $method && !empty($id)) {
     $data = json_decode(file_get_contents('php://input'), true);
     if (!empty($data['name']) && !empty($data['email']) && !empty($data['password'])) {
-        $result = $user->updateUser($id, $data['name'], $data['email'], $data['password']);
+        $result = $user->update($id, $data);
         if (0 == $result) {
             http_response_code(404);
             echo 'User not found';
@@ -54,13 +74,13 @@ if ('PUT' == $method && !empty($id)) {
 
 // Удаление пользователя по ID
 if ('DELETE' == $method && !empty($id)) {
-    $result = $user->deleteUser($id);
+    $result = $user->delete($id);
     if (0 == $result) {
         http_response_code(404);
         echo 'User not found';
         exit;
     }
-    http_response_code(204);
+    http_response_code(200);
     exit;
 }
 
